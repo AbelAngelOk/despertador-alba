@@ -23,21 +23,15 @@ En vez de un freemium clásico (funciones limitadas desde el día 1), la app da 
 - 3 meses es tiempo suficiente para atravesar cambios notables en el horario de amanecer (el usuario ve a la app "seguir el ritmo" de las estaciones), lo que refuerza el valor percibido del producto frente a un despertador de hora fija.
 - Para cuando llega el corte, el usuario ya formó el hábito (usó el despertador varias semanas seguidas), lo que refuerza la percepción de "esto ya es parte de mi rutina" en el momento de pedirle que pague.
 
-## Modelo de acceso: uso sin cuenta + registro progresivo
+## Modelo de acceso: 100% sin cuenta
 
-El objetivo es que la retención nunca se pierda por fricción de registro. Por eso el acceso a la app tiene dos ejes independientes:
+> **Actualizado** — la app nunca pide crear cuenta ni iniciar sesión, para ninguna función, en ningún momento. Ver la decisión completa en [17-sin-cuenta-y-notificaciones.md](17-sin-cuenta-y-notificaciones.md). Esta sección reemplaza al modelo de "registro progresivo" (uso libre + login para Seguimiento/Perfil vía Google/Apple Sign-In) que se había planteado originalmente y nunca se llegó a implementar.
 
-1. **Uso del despertador (tab Despertadores)**: no requiere cuenta ni login en ningún momento. Cualquiera que se descarga la app puede crear y usar despertadores de inmediato, con todas las funciones Premium disponibles durante los 3 meses de prueba.
-2. **Seguimiento y Perfil/Configuración**: si requieren cuenta, porque dependen de datos asociados al usuario — el seguimiento necesita persistir el historial, y la configuración necesita guardar qué notificaciones tiene habilitadas (ver [08-modulo-notificaciones.md](08-modulo-notificaciones.md)). El registro se pide recién en el momento en que el usuario intenta usar alguna de estas dos secciones, nunca antes.
-
-El registro se resuelve con métodos de un solo toque — **Google Sign-In** como principal, y **Sign in with Apple** en iOS (requerido por las guías de la App Store si se ofrece Google como alternativa) — sin formulario de email/contraseña, para no introducir fricción en el momento en que el usuario recién decidió comprometerse más con la app. Detalle de la pantalla en [07-vistas-app.md](07-vistas-app.md).
+Todas las secciones de la app —Despertadores, Seguimiento, Perfil— funcionan de entrada, con datos 100% locales al dispositivo. No hay una pantalla de login ni un punto en el que se le pida al usuario registrarse para desbloquear algo.
 
 ### Flujo esperado del usuario
-1. Se descarga la app y empieza a usarla de inmediato (crea despertadores), sin registrarse.
-2. Se registra —con Google/Apple, en segundos— cuando quiere usar Seguimiento o configurar notificaciones.
-3. A los 3 meses de la descarga, sus funciones Premium se limitan al plan gratuito; ahí llega el momento en que necesita pasar a Premium para recuperarlas (ver tácticas de conversión más abajo).
-
-Este orden es intencional: primero se engancha con el producto sin fricción, después se lo invita a comprometerse (cuenta) para desbloquear valor adicional, y recién al final se le pide pagar — nunca al revés.
+1. Se descarga la app y empieza a usarla de inmediato: crea despertadores, ve su seguimiento, configura su perfil — todo sin registrarse.
+2. A los 3 meses de la descarga, sus funciones Premium se limitan al plan gratuito; ahí llega el momento en que necesita pasar a Premium para recuperarlas (ver tácticas de conversión más abajo). Esa compra se resuelve con el sistema nativo de la tienda (Google Play Billing / App Store), asociada a la cuenta de la tienda del dispositivo, no a una cuenta propia de la app.
 
 ## Planes
 
@@ -69,5 +63,5 @@ En esa misma pantalla de downgrade, mostrar datos reales de uso acumulados duran
 
 ## Notas
 - El monto (USD 20/año) y la duración del período de prueba (3 meses) son un punto de partida; conviene validarlos con usuarios reales antes de fijarlos definitivamente.
-- El riesgo de abuso del trial atado a dispositivo (reinstalar para renovarlo) y la solución propuesta —apoyarse en la elegibilidad nativa de Google Play / Apple más una reconciliación al iniciar sesión— están detallados en [09-riesgos-tecnicos.md](09-riesgos-tecnicos.md).
+- El riesgo de abuso del trial atado a dispositivo (reinstalar para renovarlo) y la solución propuesta —apoyarse en la elegibilidad nativa de Google Play / Apple— está detallado en [09-riesgos-tecnicos.md](09-riesgos-tecnicos.md). La reconciliación por cuenta propia que se planteaba ahí quedó descartada junto con el login (ver [17-sin-cuenta-y-notificaciones.md](17-sin-cuenta-y-notificaciones.md)).
 - Este documento es una propuesta de partida para discusión, no una decisión final de negocio.

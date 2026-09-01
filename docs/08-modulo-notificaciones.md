@@ -1,14 +1,18 @@
-# Módulo de notificaciones
+# Módulo de notificaciones — propuesta original (parcialmente implementada)
 
-> Reemplaza el enfoque anterior de "notificación de advertencia" + "catálogo de consejos" fijo (docs previas) por un único módulo centralizado y configurable. Ver funcionalidad de origen en [02-funcionalidades.md](02-funcionalidades.md), configuración en la UI en [07-vistas-app.md](07-vistas-app.md), y regla de cuenta requerida en [06-modelo-negocio.md](06-modelo-negocio.md).
+> **Actualizado** — la versión que se terminó construyendo es más simple que lo que describe este documento: sin timing configurable (cada notificación dispara en su momento natural, sin opción de "15 min antes"), sin las notificaciones de hábitos de higiene del sueño (cafeína, luz azul, pantallas), y con un catálogo más grande de etapas del día (los 9 momentos solares del día completo, no solo 2 vespertinos). Ver la versión real e implementada en [18-notificaciones-del-dia.md](18-notificaciones-del-dia.md). Este documento queda como la propuesta original — útil si en algún momento se quiere sumar el timing configurable o el catálogo de hábitos que acá se describen y todavía no existen.
+
+> Reemplaza el enfoque anterior de "notificación de advertencia" + "catálogo de consejos" fijo (docs previas) por un único módulo centralizado y configurable. Ver funcionalidad de origen en [02-funcionalidades.md](02-funcionalidades.md) y configuración en la UI en [07-vistas-app.md](07-vistas-app.md). **Distinto de las notificaciones de "está sonando la alarma"**, que son otra cosa — ver [17-sin-cuenta-y-notificaciones.md](17-sin-cuenta-y-notificaciones.md).
 
 ## Concepto
 
 El usuario habilita, de forma independiente, cada notificación que quiere recibir. Cada notificación tiene un **momento recomendado** propio (calculado en función del ritmo circadiano del usuario, típicamente relativo a la hora estimada de su próximo despertador), y el usuario elige **cuándo** recibir el aviso en relación a ese momento.
 
-## Regla de negocio: requiere cuenta
+## Regla de negocio: no requiere cuenta
 
-Habilitar, deshabilitar o configurar cualquier notificación de este módulo requiere que el usuario esté registrado y logueado. El resto de la app (crear y usar despertadores) no lo requiere. Ver flujo completo de cuenta en [06-modelo-negocio.md](06-modelo-negocio.md).
+> Actualizado — este módulo, igual que el resto de la app, no va a requerir cuenta cuando se implemente. Se descartó el modelo de registro progresivo; ver [17-sin-cuenta-y-notificaciones.md](17-sin-cuenta-y-notificaciones.md).
+
+Habilitar, deshabilitar o configurar cualquier notificación de este módulo se guarda 100% local al dispositivo, igual que crear y usar despertadores.
 
 ## Timing configurable (aplica a toda notificación del módulo)
 

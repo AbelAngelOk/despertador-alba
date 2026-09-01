@@ -1,0 +1,367 @@
+<title>Reloj de Cielo</title>
+<style>
+  :root {
+    --bg: #07070C;
+    --panel: #101018;
+    --panel-edge: #1C1C29;
+    --bezel: #050508;
+    --ink: #F2EEE4;
+    --ink-dim: #8B8FA8;
+    --ink-faint: #55586C;
+    --accent: #FF9B54;
+    --accent-2: #B9A6FF;
+    --hairline: rgba(242, 238, 228, 0.09);
+
+    --font-display: -apple-system, "Segoe UI Semibold", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --font-rounded: ui-rounded, "SF Pro Rounded", "Segoe UI", var(--font-body);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 64px 32px 96px;
+  }
+
+  header.intro {
+    max-width: 62ch;
+    margin-bottom: 48px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0 0 16px;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .lede {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin: 0 0 22px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--hairline);
+    flex: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 22px 18px;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cell-label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cell-hour {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+
+  .cell-deg {
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  .phone {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 19.2;
+    max-width: 168px;
+    border-radius: 20px;
+    background: var(--bezel);
+    padding: 4px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 18px 30px -18px rgba(0, 0, 0, 0.85);
+    border: 1px solid var(--panel-edge);
+  }
+
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    font-family: var(--font-rounded);
+  }
+
+  .gradient {
+    position: absolute;
+    inset: 0;
+  }
+
+  .horizon {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .sun-glow {
+    position: absolute;
+    left: 50%;
+    border-radius: 50%;
+    background: rgba(255, 206, 122, 0.35);
+    pointer-events: none;
+  }
+
+  .sun {
+    position: absolute;
+    left: 50%;
+    border-radius: 50%;
+    background: #ffe8b0;
+  }
+
+  .scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 46%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.55));
+  }
+
+  .overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 9px 8px 10px;
+  }
+
+  .overlay .time {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .overlay .phase {
+    font-size: 8.5px;
+    line-height: 1.3;
+    color: rgba(246, 241, 231, 0.82);
+    margin-top: 2px;
+    font-family: var(--font-body);
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    line-height: 1.7;
+    max-width: 62ch;
+  }
+
+  footer code {
+    color: var(--ink-dim);
+    background: var(--panel);
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--hairline);
+  }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <p class="eyebrow">Despertador — Inicio · componente SkyClock</p>
+    <h1>Reloj de Cielo, hora por hora</h1>
+    <p class="lede">
+      Así se ve la vista Inicio a pantalla completa a lo largo de un mismo día, muestreada en
+      cada hora en punto. El degradado y la posición del sol están calculados con el mismo
+      algoritmo que usa la app (<code>skyGradient.ts</code> + <code>sunPosition.ts</code>), para
+      una latitud de Buenos Aires (‑34,6°) en un día de equinoccio.
+    </p>
+    <div class="legend" id="legend"></div>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    En la app real el degradado se recalcula cada 30s con la altitud solar exacta del momento y
+    la ubicación del usuario — acá, al muestrear una sola vez por hora, algunas etapas de
+    crepúsculo más breves (ej. civil) pueden no caer justo en una hora entera y no se ven como
+    frame propio.
+  </footer>
+</div>
+
+<script>
+  // --- Idéntico a src/lib/skyGradient.ts ---
+  const KEYFRAMES = [
+    { deg: -90, top: '#04050C', bottom: '#0B0C1A' },
+    { deg: -18, top: '#0B0C1A', bottom: '#181B3D' },
+    { deg: -12, top: '#181B3D', bottom: '#3A2467' },
+    { deg: -6, top: '#3A2467', bottom: '#8B4B7A' },
+    { deg: 0, top: '#8B4B7A', bottom: '#FF9B54' },
+    { deg: 12, top: '#4C86C6', bottom: '#FFCE7A' },
+    { deg: 90, top: '#2E6FB8', bottom: '#BEE3FF' },
+  ];
+
+  function hexToRgb(hex) {
+    const v = parseInt(hex.slice(1), 16);
+    return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+  }
+  function rgbToHex([r, g, b]) {
+    const toHex = (c) => Math.round(c).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+  function lerpColor(a, b, t) {
+    const ca = hexToRgb(a), cb = hexToRgb(b);
+    return rgbToHex([ca[0] + (cb[0] - ca[0]) * t, ca[1] + (cb[1] - ca[1]) * t, ca[2] + (cb[2] - ca[2]) * t]);
+  }
+  function getSkyColors(deg) {
+    const clamped = Math.max(KEYFRAMES[0].deg, Math.min(KEYFRAMES[KEYFRAMES.length - 1].deg, deg));
+    let lower = KEYFRAMES[0], upper = KEYFRAMES[KEYFRAMES.length - 1];
+    for (let i = 0; i < KEYFRAMES.length - 1; i++) {
+      if (clamped >= KEYFRAMES[i].deg && clamped <= KEYFRAMES[i + 1].deg) {
+        lower = KEYFRAMES[i]; upper = KEYFRAMES[i + 1]; break;
+      }
+    }
+    const span = upper.deg - lower.deg;
+    const t = span === 0 ? 0 : (clamped - lower.deg) / span;
+    return [lerpColor(lower.top, upper.top, t), lerpColor(lower.bottom, upper.bottom, t)];
+  }
+
+  // --- Idéntico a src/lib/sunPosition.ts (fase) ---
+  function getPhaseLabel(deg, isRising) {
+    const dir = isRising ? 'amaneciendo' : 'atardeciendo';
+    if (deg >= 6) return 'Día';
+    if (deg >= 0) return isRising ? 'Saliendo el sol' : 'El sol se está poniendo';
+    if (deg >= -6) return `Crep. civil (${dir})`;
+    if (deg >= -12) return `Crep. náutico (${dir})`;
+    if (deg >= -18) return `Crep. astronómico (${dir})`;
+    return 'Noche';
+  }
+
+  // --- Idéntico a la normalización de posición del sol en sky-clock.tsx ---
+  const VISIBLE_MIN_DEG = -18;
+  const VISIBLE_MAX_DEG = 45;
+  function normalizeAltitude(deg) {
+    const clamped = Math.max(VISIBLE_MIN_DEG, Math.min(VISIBLE_MAX_DEG, deg));
+    return 1 - (clamped - VISIBLE_MIN_DEG) / (VISIBLE_MAX_DEG - VISIBLE_MIN_DEG);
+  }
+
+  // --- Altitud solar simplificada (fórmula estándar, declinación 0 = equinoccio) ---
+  const LATITUDE_DEG = -34.6; // Buenos Aires
+  function altitudeForHour(hour) {
+    const lat = (LATITUDE_DEG * Math.PI) / 180;
+    const hourAngle = ((15 * (hour - 12)) * Math.PI) / 180;
+    const alt = Math.asin(Math.cos(lat) * Math.cos(hourAngle));
+    return (alt * 180) / Math.PI;
+  }
+
+  const horizonTop = normalizeAltitude(0) * 100;
+  const grid = document.getElementById('grid');
+
+  for (let hour = 0; hour < 24; hour++) {
+    const deg = altitudeForHour(hour);
+    const isRising = hour < 12;
+    const [top, bottom] = getSkyColors(deg);
+    const phase = getPhaseLabel(deg, isRising);
+    const sunTop = normalizeAltitude(deg) * 100;
+
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.innerHTML = `
+      <div class="phone">
+        <div class="screen">
+          <div class="gradient" style="background:linear-gradient(to bottom, ${top}, ${bottom});"></div>
+          <div class="horizon" style="top:${horizonTop}%;"></div>
+          <div class="sun-glow" style="top:${sunTop}%; width:26px; height:26px; margin-left:-13px; margin-top:-13px;"></div>
+          <div class="sun" style="top:${sunTop}%; width:13px; height:13px; margin-left:-6.5px; margin-top:-6.5px;"></div>
+          <div class="scrim"></div>
+          <div class="overlay">
+            <div class="time">${String(hour).padStart(2, '0')}:00</div>
+            <div class="phase">${phase} · ${Math.round(deg)}°</div>
+          </div>
+        </div>
+      </div>
+      <div class="cell-label">
+        <span class="cell-hour">${String(hour).padStart(2, '0')}:00</span>
+        <span class="cell-deg">${Math.round(deg)}°</span>
+      </div>
+    `;
+    grid.appendChild(cell);
+  }
+
+  const legend = document.getElementById('legend');
+  const legendItems = [
+    { label: 'Noche', deg: -40 },
+    { label: 'Crepúsculo', deg: -9 },
+    { label: 'Amanece / atardece', deg: 3 },
+    { label: 'Día', deg: 55 },
+  ];
+  legend.innerHTML = legendItems
+    .map(({ label, deg }) => {
+      const [top, bottom] = getSkyColors(deg);
+      return `<div class="legend-item"><span class="legend-swatch" style="background:linear-gradient(to bottom, ${top}, ${bottom});"></span>${label}</div>`;
+    })
+    .join('');
+</script>

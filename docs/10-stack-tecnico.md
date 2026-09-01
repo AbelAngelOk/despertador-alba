@@ -33,20 +33,18 @@ Si preferís otra base (Flutter, nativo por plataforma), avisá y se ajusta este
 
 ## Autenticación
 
-- **Supabase Auth** con proveedores **Google** y **Apple** (Sign in with Apple obligatorio en iOS si se ofrece Google, ver [06-modelo-negocio.md](06-modelo-negocio.md) y [07-vistas-app.md](07-vistas-app.md)).
-- El uso del despertador (tab Despertadores) no pasa por Supabase Auth en absoluto; recién se inicializa sesión cuando el usuario entra a Seguimiento o Perfil por primera vez.
+> Descartada — la app no tiene ni va a tener login/cuenta, ver [17-sin-cuenta-y-notificaciones.md](17-sin-cuenta-y-notificaciones.md). No hace falta Supabase Auth ni ningún proveedor de login.
 
 ## Backend / datos
 
-- **Supabase** (Postgres administrado + Auth + Row Level Security): mismo proveedor que `training-app`, evita mantener infraestructura propia.
-- Uso principal: persistir lo que requiere cuenta (seguimiento, preferencias de notificaciones, estado de suscripción) — ver esquema de tablas en [11-arquitectura-carpetas.md](11-arquitectura-carpetas.md). Los despertadores en sí pueden vivir solo en el dispositivo (AsyncStorage) ya que no requieren cuenta; opcionalmente se sincronizan a Supabase si el usuario se loguea, para no perderlos al cambiar de dispositivo.
+- Sin backend propio. Todo (despertadores, ubicación, seguimiento, preferencias de notificaciones) se guarda 100% local con AsyncStorage — ver esquema de stores en [11-arquitectura-carpetas.md](11-arquitectura-carpetas.md).
 
 ## Pagos y suscripción
 
 - **RevenueCat** por encima de Google Play Billing / StoreKit, en vez de integrar cada uno a mano. Resuelve en una sola capa:
   - Los productos de suscripción de ambas tiendas con una sola API
   - La elegibilidad de trial/oferta introductoria por cuenta de tienda (la base de la solución al riesgo de abuso de [09-riesgos-tecnicos.md](09-riesgos-tecnicos.md))
-  - Webhooks para sincronizar el estado de la suscripción (activa/vencida/en trial) hacia Supabase, así el backend sabe qué plan tiene cada usuario sin reimplementar la lógica de recibos de cada tienda
+  - El estado de la suscripción (activa/vencida/en trial) se consulta directo desde el SDK de RevenueCat en el dispositivo — sin backend propio ni cuenta de usuario a la cual asociarlo.
 
 ## Build y distribución
 
@@ -58,4 +56,3 @@ Si preferís otra base (Flutter, nativo por plataforma), avisá y se ajusta este
 - `expo-notifications` (+ `expo-background-task` si se implementa reprogramación en segundo plano)
 - `expo-linear-gradient` (fondos degradados de cielo)
 - `react-native-purchases` (SDK de RevenueCat)
-- Proveedor Google/Apple habilitado en el proyecto de Supabase Auth (configuración, no dependencia de código)

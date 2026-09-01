@@ -23,7 +23,7 @@ Un despertador que se ajusta día a día al horario real de amanecer del lugar d
 
 Explícitamente **no** se permite programar la alarma en una fecha/hora exacta fija: ese es el diferencial de la app frente a un despertador convencional.
 
-Usar el despertador no requiere crear una cuenta; el registro se pide más adelante, solo cuando el usuario quiere seguimiento o configurar notificaciones. Ver el modelo de acceso completo en [06-modelo-negocio.md](06-modelo-negocio.md).
+La app nunca pide crear cuenta ni iniciar sesión, para ninguna función — es una decisión permanente, no una limitación temporal. Ver [17-sin-cuenta-y-notificaciones.md](17-sin-cuenta-y-notificaciones.md).
 
 ## Público objetivo
 
