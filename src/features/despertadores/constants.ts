@@ -1,4 +1,4 @@
-import { AlarmSoundId, SunStageType } from '@/types/alarm';
+import { Alarm, AlarmInput, AlarmKind, AlarmSoundId, SunStageType } from '@/types/alarm';
 
 export const DAYS_OF_WEEK: { jsDay: number; label: string; key: string }[] = [
   { jsDay: 1, label: 'L', key: 'lun' },
@@ -21,6 +21,26 @@ export const SUN_STAGE_LABELS: Record<SunStageType, string> = SUN_STAGES.reduce(
   (acc, stage) => ({ ...acc, [stage.type]: stage.label }),
   {} as Record<SunStageType, string>
 );
+
+/** Etapa siguiente en la progresión del amanecer, o null si ya es la última (sunrise). */
+export function getNextSunStage(stage: SunStageType): SunStageType | null {
+  const index = SUN_STAGES.findIndex((item) => item.type === stage);
+  return SUN_STAGES[index + 1]?.type ?? null;
+}
+
+/** Texto de la pantalla de alarma, acorde a qué tan clarito está el cielo en esa etapa. */
+export const SUN_STAGE_WAKE_MESSAGES: Record<SunStageType, string> = {
+  astronomical: 'Levantate, el cielo recién empieza a aclararse.',
+  nautical: 'Levantate, ya se distingue el horizonte.',
+  civil: 'Levantate, hay luz de sobra afuera.',
+  sunrise: 'Levantate, el sol ya se asoma en el horizonte.',
+};
+
+/** Mensaje al sonar: acorde a la etapa solar para despertadores solares, genérico para clásicos. */
+export function getAlarmWakeMessage(alarm: Pick<Alarm, 'kind' | 'stage'>): string {
+  if (alarm.kind === 'classic') return 'Es hora de despertar';
+  return SUN_STAGE_WAKE_MESSAGES[alarm.stage];
+}
 
 export const DEFAULT_ACTIVE_DAYS = [1, 2, 3, 4, 5];
 
@@ -61,6 +81,22 @@ export const ALARM_SOUNDS: { id: AlarmSoundId; label: string; file: number }[] =
     file: require('../../../assets/sounds/cuenco_tibetano_d.mp3'),
   },
 ];
+
+export const DEFAULT_CLASSIC_TIME = { hour: 7, minute: 0 };
+
+/** Valores iniciales del formulario de un despertador nuevo (y del de prueba rápida). */
+export function createDefaultAlarmInput(kind: AlarmKind = 'solar'): AlarmInput {
+  return {
+    kind,
+    ...(kind === 'classic' ? { classicTime: DEFAULT_CLASSIC_TIME } : {}),
+    name: '',
+    stage: 'sunrise',
+    offsetMinutes: 0,
+    activeDays: DEFAULT_ACTIVE_DAYS,
+    enabled: true,
+    sound: DEFAULT_ALARM_SOUND,
+  };
+}
 
 export const ALARM_SOUND_LABELS: Record<AlarmSoundId, string> = {
   ...ALARM_SOUNDS.reduce(

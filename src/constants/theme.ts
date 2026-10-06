@@ -1,23 +1,10 @@
 import { Platform } from 'react-native';
 
-export const Colors = {
-  background: '#0B0C1A',
-  backgroundElement: '#151833',
-  backgroundSelected: '#232A57',
-  border: '#2A2F55',
-  text: '#F6F1E7',
-  textSecondary: '#A6ACC9',
-  accent: '#FF9B54',
-  accentSecondary: '#B9A6FF',
-  danger: '#FF6B6B',
-} as const;
-
-export type ThemeColor = keyof typeof Colors;
-
-export const Gradients = {
-  sky: ['#0B0C1A', '#3A2467', '#FF9B54'] as [string, string, string],
-  accent: ['#FF9B54', '#FFCE7A'] as [string, string],
-} as const;
+/**
+ * Colores, radios y sombras ahora viven en `@/constants/themes` (uno por
+ * template) y se leen vía `useTheme()`. Lo que queda acá es lo que NO varía
+ * entre templates: la escala de espaciado y las fuentes de sistema.
+ */
 
 export const Fonts = Platform.select({
   ios: {
@@ -40,13 +27,6 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
-} as const;
-
-export const Radius = {
-  small: 8,
-  medium: 16,
-  large: 24,
-  pill: 999,
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;

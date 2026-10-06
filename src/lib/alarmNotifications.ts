@@ -13,7 +13,7 @@ export const ALARM_CHANNEL_ID = 'alarms';
  * eso rompería toda la app al abrirla en Expo Go. Por eso el require es
  * condicional y perezoso: en Expo Go directamente no se carga el paquete.
  */
-const isExpoGo = Constants.appOwnership === 'expo';
+export const isExpoGo = Constants.appOwnership === 'expo';
 
 function getNotifications(): typeof NotificationsModule | null {
   if (isExpoGo) return null;
@@ -47,12 +47,36 @@ export async function ensureNotificationPermissions(): Promise<boolean> {
   return requested.granted;
 }
 
+/**
+ * Android descarta en silencio `bypassDnd: true` si la app no tiene el
+ * acceso especial a la política de notificaciones ("No molestar") — el
+ * canal vuelve con `bypassDnd: false` de verdad en ese caso. Releerlo
+ * después de crearlo es entonces la forma de detectar el permiso real, sin
+ * necesitar un módulo nativo para esto. `null` = no se pudo determinar
+ * (plataforma sin este concepto, Expo Go, o el canal todavía no existe).
+ */
+export async function getAlarmChannelBypassesDnd(): Promise<boolean | null> {
+  if (!Notifications || Platform.OS !== 'android') return null;
+  const channel = await Notifications.getNotificationChannelAsync(ALARM_CHANNEL_ID);
+  if (!channel) return null;
+  return channel.bypassDnd === true;
+}
+
 export async function configureAndroidChannel(): Promise<void> {
   if (!Notifications || Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync(ALARM_CHANNEL_ID, {
     name: 'Despertadores',
     importance: Notifications.AndroidImportance.MAX,
-    sound: 'default',
+    // Sin `sound` acá usa el sonido de notificación del sistema. No pasar el
+    // string 'default': expo-notifications lo busca como nombre de archivo de
+    // sonido personalizado (no como palabra clave) y, al no encontrarlo,
+    // loguea "Custom sound 'default' not found in native app".
+    // Sin esto, este sonido suena por el stream de multimedia (como el resto
+    // de las notificaciones) y respeta el volumen de medios, no el de alarma.
+    // usage: ALARM enruta al stream de alarma; bypassDnd hace que suene aunque
+    // el modo No Molestar esté activo (igual que la app de Reloj del sistema).
+    audioAttributes: { usage: Notifications.AndroidAudioUsage.ALARM },
+    bypassDnd: true,
     vibrationPattern: [0, 500, 250, 500],
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
   });
@@ -65,7 +89,8 @@ function notificationIdFor(alarmId: string, occurrenceIso: string, ringIndex: nu
 export async function scheduleAlarmRings(
   alarmId: string,
   alarmName: string,
-  occurrence: Date
+  occurrence: Date,
+  wakeMessage = 'Es hora de despertar'
 ): Promise<void> {
   if (!Notifications) return;
   const occurrenceIso = occurrence.toISOString();
@@ -78,7 +103,7 @@ export async function scheduleAlarmRings(
       identifier: notificationIdFor(alarmId, occurrenceIso, ringIndex),
       content: {
         title: alarmName || 'Despertador',
-        body: ringIndex === 0 ? 'Es hora de despertar' : 'Seguís sin apagar la alarma',
+        body: ringIndex === 0 ? wakeMessage : 'Seguís sin apagar la alarma',
         sound: 'default',
         data: { alarmId, occurrenceIso },
       },

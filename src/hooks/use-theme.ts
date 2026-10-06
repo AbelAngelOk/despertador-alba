@@ -1,5 +1,7 @@
-import { Colors } from '@/constants/theme';
+import { AppTheme, getTheme } from '@/constants/themes';
+import { useThemeStore } from '@/store/theme';
 
-export function useTheme() {
-  return Colors;
+export function useTheme(): AppTheme {
+  const themeId = useThemeStore((state) => state.themeId);
+  return getTheme(themeId);
 }

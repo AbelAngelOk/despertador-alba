@@ -1,10 +1,13 @@
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
 import { MICRO_ACTIVITY_ICON_CHOICES } from '@/features/despertadores/microActivityCatalogStore';
+import { useTheme } from '@/hooks/use-theme';
 
 type FeatherIconName = keyof typeof Feather.glyphMap;
 
@@ -16,6 +19,9 @@ interface IconPickerProps {
 }
 
 export function IconPicker({ visible, value, onSelect, onClose }: IconPickerProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
@@ -38,7 +44,7 @@ export function IconPicker({ visible, value, onSelect, onClose }: IconPickerProp
                 <Feather
                   name={icon as FeatherIconName}
                   size={22}
-                  color={active ? Colors.background : Colors.text}
+                  color={active ? theme.colors.onPrimary : theme.colors.textPrimary}
                 />
               </Pressable>
             );
@@ -49,47 +55,49 @@ export function IconPicker({ visible, value, onSelect, onClose }: IconPickerProp
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  sheet: {
-    backgroundColor: Colors.backgroundElement,
-    borderTopLeftRadius: Radius.large,
-    borderTopRightRadius: Radius.large,
-    paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.four,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: Radius.pill,
-    backgroundColor: Colors.border,
-    marginTop: Spacing.two,
-  },
-  title: {
-    marginTop: Spacing.three,
-    marginBottom: Spacing.three,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-  },
-  cell: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.medium,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  cellActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    sheet: {
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: theme.radius.large,
+      borderTopRightRadius: theme.radius.large,
+      paddingHorizontal: Spacing.four,
+      paddingBottom: Spacing.four,
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 40,
+      height: 4,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.border,
+      marginTop: Spacing.two,
+    },
+    title: {
+      marginTop: Spacing.three,
+      marginBottom: Spacing.three,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.two,
+    },
+    cell: {
+      width: 48,
+      height: 48,
+      borderRadius: theme.radius.medium,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    cellActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+  });
+}

@@ -5,6 +5,24 @@ import { useAlarmsStore } from './store';
 import { resolveWakeResult } from './wakeResult';
 
 const LOOKBACK_DAYS = 14;
+const STALE_TEST_ALARM_MS = 60 * 60_000;
+
+/**
+ * Borra despertadores de prueba (testRingAt) que quedaron sin apagar hace más
+ * de una hora, por ejemplo porque la app se cerró antes de que sonaran. En uso
+ * normal se borran solos al apagarlos (ver alarma-sonando.tsx), esto es solo
+ * la red de seguridad para que no se acumulen en la lista.
+ */
+export function reconcileTestAlarms(): void {
+  const { alarms, removeAlarm } = useAlarmsStore.getState();
+  const now = Date.now();
+
+  for (const alarm of alarms) {
+    if (!alarm.testRingAt) continue;
+    if (now - new Date(alarm.testRingAt).getTime() < STALE_TEST_ALARM_MS) continue;
+    removeAlarm(alarm.id);
+  }
+}
 
 export function reconcileMissedDays(): void {
   const alarms = useAlarmsStore.getState().alarms;

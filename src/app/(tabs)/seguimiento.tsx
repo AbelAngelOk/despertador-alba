@@ -1,16 +1,24 @@
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SkyScreen } from '@/components/sky/sky-screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { NavCard } from '@/components/ui/nav-card';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
 import { countCompletedDays, useMicroActivityStore } from '@/features/despertadores/microActivityStore';
+import { useTheme } from '@/hooks/use-theme';
 import { computeStreak, countWakeDays, dateKey, DayStatus, useTrackingStore } from '@/store/tracking';
 
 const DAYS_TO_SHOW = 7;
 const WEEKDAY_LABELS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+// Íconos/textos sobre un relleno de estado (success/warning/error) suelen
+// tener contraste suficiente en blanco en los 5 templates, ya que esos tres
+// tokens se definieron deliberadamente saturados/oscuros, no pasteles.
+const ON_STATUS_COLOR = '#FFFFFF';
 
 interface DayCell {
   key: string;
@@ -39,19 +47,22 @@ function buildDays(entries: Record<string, DayStatus>): DayCell[] {
   return days;
 }
 
-function DayPill({ day }: { day: DayCell }) {
+function DayPill({ day, styles }: { day: DayCell; styles: ReturnType<typeof createStyles> }) {
+  const theme = useTheme();
+
   const config = {
-    onTime: { backgroundColor: Colors.accent, borderColor: Colors.accent, icon: 'check' as const },
+    onTime: { backgroundColor: theme.colors.success, borderColor: theme.colors.success, icon: 'check' as const },
     late: {
-      backgroundColor: Colors.accentSecondary,
-      borderColor: Colors.accentSecondary,
+      backgroundColor: theme.colors.warning,
+      borderColor: theme.colors.warning,
       icon: 'clock' as const,
     },
-    missed: { backgroundColor: 'transparent', borderColor: Colors.danger, icon: 'x' as const },
-    none: { backgroundColor: 'transparent', borderColor: Colors.border, icon: null },
+    missed: { backgroundColor: 'transparent', borderColor: theme.colors.error, icon: 'x' as const },
+    none: { backgroundColor: 'transparent', borderColor: theme.colors.border, icon: null },
   }[day.status];
 
-  const iconColor = day.status === 'missed' || day.status === 'none' ? Colors.textSecondary : Colors.background;
+  const iconColor =
+    day.status === 'missed' || day.status === 'none' ? theme.colors.textSecondary : ON_STATUS_COLOR;
 
   return (
     <View style={styles.dayColumn}>
@@ -62,7 +73,7 @@ function DayPill({ day }: { day: DayCell }) {
         style={[
           styles.pill,
           { backgroundColor: config.backgroundColor, borderColor: config.borderColor },
-          day.isToday && styles.pillToday,
+          day.isToday && { borderColor: theme.colors.textPrimary },
         ]}>
         {config.icon ? <Feather name={config.icon} size={16} color={iconColor} /> : null}
       </View>
@@ -71,6 +82,9 @@ function DayPill({ day }: { day: DayCell }) {
 }
 
 export default function SeguimientoScreen() {
+  const router = useRouter();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const entries = useTrackingStore((state) => state.entries);
   const microActivityInstances = useMicroActivityStore((state) => state.instances);
   const days = useMemo(() => buildDays(entries), [entries]);
@@ -82,15 +96,22 @@ export default function SeguimientoScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SkyScreen edges={['top']}>
       <View style={styles.content}>
+        <NavCard
+          icon="user"
+          title="Perfil"
+          description="Ajustes, microactividades y más."
+          onPress={() => router.push('/perfil')}
+        />
+
         <ThemedText type="title" style={styles.heading}>
           Seguimiento
         </ThemedText>
 
-        <ThemedView type="backgroundElement" style={styles.streakCard}>
+        <ThemedView type="surface" style={styles.streakCard}>
           <View style={styles.streakHeader}>
-            <Feather name="zap" size={22} color={Colors.accent} />
+            <Feather name="zap" size={22} color={theme.colors.primary} />
             <ThemedText type="title" style={styles.streakNumber}>
               {streak}
             </ThemedText>
@@ -101,14 +122,14 @@ export default function SeguimientoScreen() {
 
           <View style={styles.week}>
             {days.map((day) => (
-              <DayPill key={day.key} day={day} />
+              <DayPill key={day.key} day={day} styles={styles} />
             ))}
           </View>
 
           <View style={styles.legend}>
-            <LegendItem color={Colors.accent} label="Te levantaste" />
-            <LegendItem color={Colors.accentSecondary} label="Con retraso" />
-            <LegendItem color={Colors.danger} label="No te levantaste" outline />
+            <LegendItem color={theme.colors.success} label="Te levantaste" />
+            <LegendItem color={theme.colors.warning} label="Con retraso" />
+            <LegendItem color={theme.colors.error} label="No te levantaste" outline />
           </View>
         </ThemedView>
 
@@ -117,15 +138,17 @@ export default function SeguimientoScreen() {
             icon="sunrise"
             value={wakeDays}
             label={wakeDays === 1 ? 'día que te levantaste' : 'días que te levantaste'}
+            styles={styles}
           />
           <StatCard
             icon="check-circle"
             value={microActivityDays}
             label={microActivityDays === 1 ? 'día con microactividad' : 'días con microactividad'}
+            styles={styles}
           />
         </View>
       </View>
-    </SafeAreaView>
+    </SkyScreen>
   );
 }
 
@@ -133,14 +156,18 @@ function StatCard({
   icon,
   value,
   label,
+  styles,
 }: {
   icon: keyof typeof Feather.glyphMap;
   value: number;
   label: string;
+  styles: ReturnType<typeof createStyles>;
 }) {
+  const theme = useTheme();
+
   return (
-    <ThemedView type="backgroundElement" style={styles.statCard}>
-      <Feather name={icon} size={20} color={Colors.accentSecondary} />
+    <ThemedView type="surface" style={styles.statCard}>
+      <Feather name={icon} size={20} color={theme.colors.accent} />
       <ThemedText type="title" style={styles.statNumber}>
         {value}
       </ThemedText>
@@ -170,54 +197,6 @@ function LegendItem({ color, label, outline }: { color: string; label: string; o
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.four,
-    gap: Spacing.three,
-  },
-  heading: {
-    fontSize: 28,
-    lineHeight: 34,
-  },
-  streakCard: {
-    borderRadius: Radius.large,
-    padding: Spacing.four,
-    gap: Spacing.four,
-  },
-  streakHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  streakNumber: {
-    fontSize: 32,
-    lineHeight: 36,
-  },
-  week: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dayColumn: {
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  pill: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.pill,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pillToday: {
-    borderColor: Colors.text,
-  },
-  legend: {
-    gap: Spacing.two,
-  },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -226,24 +205,70 @@ const styles = StyleSheet.create({
   legendDot: {
     width: 12,
     height: 12,
-    borderRadius: Radius.pill,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.three,
-  },
-  statCard: {
-    flex: 1,
-    borderRadius: Radius.large,
-    padding: Spacing.four,
-    gap: Spacing.one,
-    alignItems: 'flex-start',
-  },
-  statNumber: {
-    fontSize: 32,
-    lineHeight: 36,
-  },
-  statLabel: {
-    lineHeight: 18,
+    borderRadius: 999,
   },
 });
+
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    content: {
+      padding: Spacing.four,
+      gap: Spacing.three,
+    },
+    heading: {
+      fontSize: 28,
+      lineHeight: 34,
+    },
+    streakCard: {
+      borderRadius: theme.radius.large,
+      padding: Spacing.four,
+      gap: Spacing.four,
+    },
+    streakHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    streakNumber: {
+      fontSize: 32,
+      lineHeight: 36,
+    },
+    week: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    dayColumn: {
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    pill: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radius.pill,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    legend: {
+      gap: Spacing.two,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      gap: Spacing.three,
+    },
+    statCard: {
+      flex: 1,
+      borderRadius: theme.radius.large,
+      padding: Spacing.four,
+      gap: Spacing.one,
+      alignItems: 'flex-start',
+    },
+    statNumber: {
+      fontSize: 32,
+      lineHeight: 36,
+    },
+    statLabel: {
+      lineHeight: 18,
+    },
+  });
+}

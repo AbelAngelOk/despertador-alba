@@ -24,6 +24,12 @@ function rgbToHex([r, g, b]: [number, number, number]): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/** '#rrggbb' → 'rgba(r, g, b, alpha)'. */
+export function withAlpha(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export function lerpColor(hexA: string, hexB: string, t: number): string {
   const a = hexToRgb(hexA);
   const b = hexToRgb(hexB);

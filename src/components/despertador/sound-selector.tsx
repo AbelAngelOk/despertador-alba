@@ -1,11 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
 import { ALARM_SOUNDS, CUSTOM_SOUND_ID, CUSTOM_SOUND_LABEL } from '@/features/despertadores/constants';
+import { useTheme } from '@/hooks/use-theme';
 import { resolveAlarmSoundSource } from '@/lib/alarmSound';
 import { pickCustomSound } from '@/lib/customSound';
 import { useCustomSoundStore } from '@/store/customSound';
@@ -17,6 +19,8 @@ interface SoundSelectorProps {
 }
 
 export function SoundSelector({ value, onChange }: SoundSelectorProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const customSoundUri = useCustomSoundStore((state) => state.uri);
   const customSoundName = useCustomSoundStore((state) => state.name);
   const setCustomSound = useCustomSoundStore((state) => state.setCustomSound);
@@ -89,10 +93,7 @@ export function SoundSelector({ value, onChange }: SoundSelectorProps) {
             key={sound.id}
             onPress={() => onChange(sound.id)}
             style={[styles.option, active && styles.optionActive]}>
-            <ThemedText
-              type="small"
-              themeColor={active ? undefined : 'textSecondary'}
-              style={active ? styles.labelActive : undefined}>
+            <ThemedText type="small" themeColor={active ? 'onPrimary' : 'textSecondary'}>
               {sound.label}
             </ThemedText>
             <Pressable
@@ -102,7 +103,7 @@ export function SoundSelector({ value, onChange }: SoundSelectorProps) {
               <Feather
                 name={playing ? 'square' : 'play'}
                 size={16}
-                color={active ? Colors.background : Colors.text}
+                color={active ? theme.colors.onPrimary : theme.colors.textPrimary}
               />
             </Pressable>
           </Pressable>
@@ -116,8 +117,7 @@ export function SoundSelector({ value, onChange }: SoundSelectorProps) {
           <View style={styles.customLabel}>
             <ThemedText
               type="small"
-              themeColor={value === CUSTOM_SOUND_ID ? undefined : 'textSecondary'}
-              style={value === CUSTOM_SOUND_ID ? styles.labelActive : undefined}
+              themeColor={value === CUSTOM_SOUND_ID ? 'onPrimary' : 'textSecondary'}
               numberOfLines={1}>
               {customSoundName ?? CUSTOM_SOUND_LABEL}
             </ThemedText>
@@ -130,14 +130,14 @@ export function SoundSelector({ value, onChange }: SoundSelectorProps) {
               <Feather
                 name={playingId === CUSTOM_SOUND_ID ? 'square' : 'play'}
                 size={16}
-                color={value === CUSTOM_SOUND_ID ? Colors.background : Colors.text}
+                color={value === CUSTOM_SOUND_ID ? theme.colors.onPrimary : theme.colors.textPrimary}
               />
             </Pressable>
             <Pressable onPress={handlePickCustomSound} hitSlop={8} style={styles.previewButton}>
               <Feather
                 name="upload"
                 size={16}
-                color={value === CUSTOM_SOUND_ID ? Colors.background : Colors.text}
+                color={value === CUSTOM_SOUND_ID ? theme.colors.onPrimary : theme.colors.textPrimary}
               />
             </Pressable>
           </View>
@@ -147,7 +147,7 @@ export function SoundSelector({ value, onChange }: SoundSelectorProps) {
           onPress={handlePickCustomSound}
           disabled={picking}
           style={[styles.option, styles.optionDashed]}>
-          <Feather name="upload" size={16} color={Colors.textSecondary} />
+          <Feather name="upload" size={16} color={theme.colors.textSecondary} />
           <ThemedText type="small" themeColor="textSecondary">
             {picking ? 'Eligiendo...' : `${CUSTOM_SOUND_LABEL}: elegir un archivo de audio`}
           </ThemedText>
@@ -157,45 +157,44 @@ export function SoundSelector({ value, onChange }: SoundSelectorProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: Spacing.two,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.three,
-    borderRadius: Radius.medium,
-    backgroundColor: Colors.backgroundElement,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  optionActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  optionDashed: {
-    justifyContent: 'flex-start',
-    gap: Spacing.two,
-    borderStyle: 'dashed',
-  },
-  labelActive: {
-    color: Colors.background,
-  },
-  customLabel: {
-    flex: 1,
-    marginRight: Spacing.two,
-  },
-  customActions: {
-    flexDirection: 'row',
-    gap: Spacing.one,
-  },
-  previewButton: {
-    width: 32,
-    height: 32,
-    borderRadius: Radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    container: {
+      gap: Spacing.two,
+    },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: Spacing.three,
+      borderRadius: theme.radius.medium,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    optionActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+    optionDashed: {
+      justifyContent: 'flex-start',
+      gap: Spacing.two,
+      borderStyle: 'dashed',
+    },
+    customLabel: {
+      flex: 1,
+      marginRight: Spacing.two,
+    },
+    customActions: {
+      flexDirection: 'row',
+      gap: Spacing.one,
+    },
+    previewButton: {
+      width: 32,
+      height: 32,
+      borderRadius: theme.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+}

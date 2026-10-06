@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
 import { SUN_STAGES } from '@/features/despertadores/constants';
+import { useTheme } from '@/hooks/use-theme';
 import { SunStageType } from '@/types/alarm';
 
 interface SunStageSelectorProps {
@@ -11,6 +14,9 @@ interface SunStageSelectorProps {
 }
 
 export function SunStageSelector({ value, onChange }: SunStageSelectorProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.column}>
       {SUN_STAGES.map((stage) => {
@@ -34,36 +40,38 @@ export function SunStageSelector({ value, onChange }: SunStageSelectorProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  column: {
-    gap: Spacing.two,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.three,
-    borderRadius: Radius.medium,
-    backgroundColor: Colors.backgroundElement,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  optionActive: {
-    borderColor: Colors.accent,
-  },
-  optionText: {
-    gap: 2,
-    flexShrink: 1,
-  },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: Radius.pill,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  radioActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accent,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    column: {
+      gap: Spacing.two,
+    },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: Spacing.three,
+      borderRadius: theme.radius.medium,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    optionActive: {
+      borderColor: theme.colors.primary,
+    },
+    optionText: {
+      gap: 2,
+      flexShrink: 1,
+    },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: theme.radius.pill,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+    },
+    radioActive: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primary,
+    },
+  });
+}

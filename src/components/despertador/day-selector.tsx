@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
 import { DAYS_OF_WEEK } from '@/features/despertadores/constants';
+import { useTheme } from '@/hooks/use-theme';
 
 interface DaySelectorProps {
   activeDays: number[];
@@ -10,6 +13,9 @@ interface DaySelectorProps {
 }
 
 export function DaySelector({ activeDays, onChange }: DaySelectorProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   function toggleDay(jsDay: number) {
     const isActive = activeDays.includes(jsDay);
     onChange(isActive ? activeDays.filter((d) => d !== jsDay) : [...activeDays, jsDay]);
@@ -24,7 +30,9 @@ export function DaySelector({ activeDays, onChange }: DaySelectorProps) {
             key={key}
             onPress={() => toggleDay(jsDay)}
             style={[styles.dot, active && styles.dotActive]}>
-            <ThemedText type="smallBold" themeColor={active ? undefined : 'textSecondary'} style={active && styles.labelActive}>
+            <ThemedText
+              type="smallBold"
+              themeColor={active ? 'onPrimary' : 'textSecondary'}>
               {label}
             </ThemedText>
           </Pressable>
@@ -34,26 +42,25 @@ export function DaySelector({ activeDays, onChange }: DaySelectorProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  dot: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.backgroundElement,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  dotActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  labelActive: {
-    color: Colors.background,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      gap: Spacing.two,
+    },
+    dot: {
+      width: 40,
+      height: 40,
+      borderRadius: theme.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    dotActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+  });
+}

@@ -1,14 +1,15 @@
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SkyClock } from '@/components/despertador/sky-clock';
 import { ThemedText } from '@/components/themed-text';
-import { GradientBackground } from '@/components/ui/gradient-background';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
 import { useNextAlarm } from '@/features/despertadores/schedule';
+import { useTheme } from '@/hooks/use-theme';
 import { requestDeviceLocation } from '@/lib/deviceLocation';
 import { useLocationStore } from '@/store/location';
 
@@ -16,6 +17,8 @@ import { useLocationStore } from '@/store/location';
 const FALLBACK_LOCATION = { latitude: -34.6037, longitude: -58.3816, label: 'Buenos Aires, Argentina' };
 
 export default function InicioScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const latitude = useLocationStore((state) => state.latitude);
   const longitude = useLocationStore((state) => state.longitude);
   const setLocation = useLocationStore((state) => state.setLocation);
@@ -43,39 +46,37 @@ export default function InicioScreen() {
 
   if (latitude == null || longitude == null) {
     return (
-      <GradientBackground>
-        <SafeAreaView style={styles.locationScreen} edges={['top', 'bottom']}>
-          <View style={styles.locationContent}>
-            <View style={styles.iconCircle}>
-              <Feather name="map-pin" size={40} color={Colors.accent} />
-            </View>
-            <ThemedText type="subtitle" style={styles.locationTitle}>
-              ¿Dónde amanece para vos?
-            </ThemedText>
-            <ThemedText type="default" themeColor="textSecondary" style={styles.locationCopy}>
-              Necesitamos tu ubicación para calcular el horario exacto de amanecer en tu zona y
-              mostrarte el cielo en vivo. Es el dato más importante de la app.
-            </ThemedText>
+      <SafeAreaView style={styles.locationScreen} edges={['top', 'bottom']}>
+        <View style={styles.locationContent}>
+          <View style={styles.iconCircle}>
+            <Feather name="map-pin" size={40} color={theme.colors.primary} />
           </View>
+          <ThemedText type="subtitle" style={styles.locationTitle}>
+            ¿Dónde amanece para vos?
+          </ThemedText>
+          <ThemedText type="default" themeColor="textSecondary" style={styles.locationCopy}>
+            Necesitamos tu ubicación para calcular el horario exacto de amanecer en tu zona y
+            mostrarte el cielo en vivo. Es el dato más importante de la app.
+          </ThemedText>
+        </View>
 
-          <View style={styles.locationActions}>
-            <PrimaryButton
-              label={requestingLocation ? 'Buscando...' : 'Usar mi ubicación'}
-              onPress={handleEnableLocation}
-              disabled={requestingLocation}
-            />
-            <PrimaryButton
-              variant="ghost"
-              label="Usar Buenos Aires, Argentina"
-              onPress={handleUseFallbackLocation}
-              disabled={requestingLocation}
-            />
-            <ThemedText type="small" themeColor="background" style={styles.fallbackNote}>
-              Usá esta opción si estás en un emulador o simulador sin GPS disponible.
-            </ThemedText>
-          </View>
-        </SafeAreaView>
-      </GradientBackground>
+        <View style={styles.locationActions}>
+          <PrimaryButton
+            label={requestingLocation ? 'Buscando...' : 'Usar mi ubicación'}
+            onPress={handleEnableLocation}
+            disabled={requestingLocation}
+          />
+          <PrimaryButton
+            variant="ghost"
+            label="Usar Buenos Aires, Argentina"
+            onPress={handleUseFallbackLocation}
+            disabled={requestingLocation}
+          />
+          <ThemedText type="small" themeColor="textMuted" style={styles.fallbackNote}>
+            Usá esta opción si estás en un emulador o simulador sin GPS disponible.
+          </ThemedText>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -86,43 +87,46 @@ export default function InicioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  locationScreen: {
-    flex: 1,
-    justifyContent: 'space-between',
-    padding: Spacing.five,
-  },
-  locationContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.three,
-  },
-  iconCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: 'rgba(255,155,84,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.two,
-  },
-  locationTitle: {
-    textAlign: 'center',
-  },
-  locationCopy: {
-    textAlign: 'center',
-    maxWidth: 320,
-  },
-  locationActions: {
-    gap: Spacing.two,
-  },
-  fallbackNote: {
-    textAlign: 'center',
-    paddingHorizontal: Spacing.three,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    locationScreen: {
+      flex: 1,
+      justifyContent: 'space-between',
+      padding: Spacing.five,
+      backgroundColor: theme.colors.background,
+    },
+    locationContent: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.three,
+    },
+    iconCircle: {
+      width: 88,
+      height: 88,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.surfaceSecondary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: Spacing.two,
+    },
+    locationTitle: {
+      textAlign: 'center',
+    },
+    locationCopy: {
+      textAlign: 'center',
+      maxWidth: 320,
+    },
+    locationActions: {
+      gap: Spacing.two,
+    },
+    fallbackNote: {
+      textAlign: 'center',
+      paddingHorizontal: Spacing.three,
+    },
+  });
+}

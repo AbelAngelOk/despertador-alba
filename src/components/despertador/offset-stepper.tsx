@@ -1,7 +1,10 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { AppTheme } from '@/constants/themes';
+import { useTheme } from '@/hooks/use-theme';
 import { formatOffset } from '@/lib/format';
 
 interface OffsetStepperProps {
@@ -11,6 +14,9 @@ interface OffsetStepperProps {
 }
 
 export function OffsetStepper({ value, onChange, step = 5 }: OffsetStepperProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -33,28 +39,30 @@ export function OffsetStepper({ value, onChange, step = 5 }: OffsetStepperProps)
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.five,
-  },
-  button: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.pill,
-    backgroundColor: Colors.backgroundElement,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonLabel: {
-    fontSize: 28,
-    lineHeight: 30,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      gap: Spacing.two,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.five,
+    },
+    button: {
+      width: 48,
+      height: 48,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonLabel: {
+      fontSize: 28,
+      lineHeight: 30,
+    },
+  });
+}

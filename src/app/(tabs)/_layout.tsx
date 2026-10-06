@@ -1,59 +1,92 @@
 import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 type FeatherIconName = keyof typeof Feather.glyphMap;
 
-function TabIcon({ name, focused }: { name: FeatherIconName; focused: boolean }) {
-  return <Feather name={name} size={22} color={focused ? Colors.accent : Colors.textSecondary} />;
+function TabIcon({
+  name,
+  focused,
+  activeColor,
+  inactiveColor,
+}: {
+  name: FeatherIconName;
+  focused: boolean;
+  activeColor: string;
+  inactiveColor: string;
+}) {
+  return <Feather name={name} size={22} color={focused ? activeColor : inactiveColor} />;
 }
 
 export default function TabsLayout() {
+  const theme = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.accent,
-        tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: Colors.backgroundElement,
-          borderTopColor: Colors.border,
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
         },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Inicio',
-          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="home"
+              focused={focused}
+              activeColor={theme.colors.primary}
+              inactiveColor={theme.colors.textSecondary}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="despertadores"
         options={{
           title: 'Despertadores',
-          tabBarIcon: ({ focused }) => <TabIcon name="sunrise" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="sunrise"
+              focused={focused}
+              activeColor={theme.colors.primary}
+              inactiveColor={theme.colors.textSecondary}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="seguimiento"
         options={{
           title: 'Seguimiento',
-          tabBarIcon: ({ focused }) => <TabIcon name="trending-up" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="trending-up"
+              focused={focused}
+              activeColor={theme.colors.primary}
+              inactiveColor={theme.colors.textSecondary}
+            />
+          ),
         }}
       />
       <Tabs.Screen
-        name="notificaciones"
+        name="recursos"
         options={{
-          title: 'Notificaciones',
-          tabBarIcon: ({ focused }) => <TabIcon name="bell" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          title: 'Perfil',
-          tabBarIcon: ({ focused }) => <TabIcon name="user" focused={focused} />,
+          title: 'Recursos',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="book-open"
+              focused={focused}
+              activeColor={theme.colors.primary}
+              inactiveColor={theme.colors.textSecondary}
+            />
+          ),
         }}
       />
     </Tabs>

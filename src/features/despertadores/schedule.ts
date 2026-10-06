@@ -14,6 +14,13 @@ export function getAlarmTimeForDate(
   latitude: number,
   longitude: number
 ): Date | null {
+  if (alarm.postponedUntil) return new Date(alarm.postponedUntil);
+  if (alarm.testRingAt) return new Date(alarm.testRingAt);
+  if (alarm.kind === 'classic' && alarm.classicTime) {
+    const time = new Date(date);
+    time.setHours(alarm.classicTime.hour, alarm.classicTime.minute, 0, 0);
+    return time;
+  }
   const stageTime = getStageTime(date, latitude, longitude, alarm.stage);
   if (!isValidStageTime(stageTime)) return null;
   return applyOffset(stageTime, alarm.offsetMinutes);
@@ -30,6 +37,17 @@ export function findNextOccurrence(
   latitude: number,
   longitude: number
 ): AlarmOccurrence | null {
+  if (alarm.postponedUntil) {
+    const postponedDate = new Date(alarm.postponedUntil);
+    // Igual que testRingAt: un único horario absoluto, no se reprograma.
+    return postponedDate.getTime() > from.getTime() ? { alarm, date: postponedDate } : null;
+  }
+  if (alarm.testRingAt) {
+    const testDate = new Date(alarm.testRingAt);
+    // Suena una única vez: si ya pasó, no hay que reprogramarla para otro día.
+    return testDate.getTime() > from.getTime() ? { alarm, date: testDate } : null;
+  }
+
   for (let dayOffset = 0; dayOffset < DAYS_TO_LOOK_AHEAD; dayOffset++) {
     const candidateDate = new Date(from);
     candidateDate.setDate(candidateDate.getDate() + dayOffset);

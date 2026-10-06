@@ -1,28 +1,40 @@
 import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Fonts, ThemeColor } from '@/constants/theme';
+import { ColorTokens } from '@/constants/themes';
+import { Fonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
-  themeColor?: ThemeColor;
+  themeColor?: keyof ColorTokens;
 };
 
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
+  const isDisplay = type === 'title' || type === 'subtitle';
 
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? 'text'] },
+        { color: theme.colors[themeColor ?? 'textPrimary'] },
         type === 'default' && styles.default,
         type === 'title' && styles.title,
         type === 'small' && styles.small,
-        type === 'smallBold' && styles.smallBold,
+        type === 'smallBold' && [styles.smallBold, { fontWeight: theme.typography.boldWeight }],
         type === 'subtitle' && styles.subtitle,
         type === 'link' && styles.link,
-        type === 'linkPrimary' && styles.linkPrimary,
+        type === 'linkPrimary' && [styles.linkPrimary, { color: theme.colors.primary }],
         type === 'code' && styles.code,
+        isDisplay && theme.typography.displayFontFamily
+          ? { fontFamily: theme.typography.displayFontFamily }
+          : null,
+        isDisplay && theme.typography.displayGlow
+          ? {
+              textShadowColor: theme.typography.displayGlow.color,
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: theme.typography.displayGlow.radius,
+            }
+          : null,
         style,
       ]}
       {...rest}
@@ -39,7 +51,6 @@ const styles = StyleSheet.create({
   smallBold: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 700,
   },
   default: {
     fontSize: 16,
@@ -63,7 +74,6 @@ const styles = StyleSheet.create({
   linkPrimary: {
     lineHeight: 30,
     fontSize: 14,
-    color: '#3c87f7',
   },
   code: {
     fontFamily: Fonts.mono,

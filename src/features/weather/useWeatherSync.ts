@@ -10,7 +10,7 @@ const REFRESH_INTERVAL_MS = 20 * 60_000;
 /**
  * Módulo de Clima (beta) — separado a propósito del cálculo astronómico
  * (sol/luna/estrellas), que es offline y siempre está activo. Este hook solo
- * hace algo si el usuario prendió el switch de clima en Perfil, y solo pisa
+ * hace algo si el usuario prendió el switch de clima en Perfil > Ajustes, y solo pisa
  * la caché cuando el fetch a Open-Meteo realmente funciona: sin red, o con
  * el switch apagado, el cielo sigue mostrando lo que ya tenía.
  */
